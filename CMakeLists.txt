@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 project(urg_node2_nl)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -7,9 +8,35 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(sensor_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+add_library(urg_node2_nl SHARED
+	src/urg_node2_nl.cpp)
+
+target_include_directories(urg_node2_nl PUBLIC include/${PROJECT_NAME})
+
+ament_target_dependencies(urg_node2_nl
+	rclcpp
+	rclcpp_components
+	sensor_msgs
+)
+
+rclcpp_components_register_node(urg_node2_nl
+	PLUGIN "urg_node2_nl::UrgNode2NL"
+	EXECUTABLE urg_node2_nl_node
+)
+
+install(TARGETS
+	urg_node2_nl
+	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
+	RUNTIME DESTINATION bin
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
