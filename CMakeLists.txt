@@ -14,6 +14,22 @@ find_package(sensor_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+set(URG_LIBRARY_DIR urg_library/current)
+set(URG_LIBRARY_C_INCLUDE_DIR ${URG_LIBRARY_DIR}/include/c)
+set(URG_LIBRARY_SRC_DIR ${URG_LIBRARY_DIR}/src)
+
+include_directories(include ${URG_LIBRARY_C_INCLUDE_DIR})
+
+add_library(urg_c SHARED
+  ${URG_LIBRARY_SRC_DIR}/urg_sensor.c
+  ${URG_LIBRARY_SRC_DIR}/urg_utils.c
+  ${URG_LIBRARY_SRC_DIR}/urg_debug.c
+  ${URG_LIBRARY_SRC_DIR}/urg_connection.c
+  ${URG_LIBRARY_SRC_DIR}/urg_ring_buffer.c
+  ${URG_LIBRARY_SRC_DIR}/urg_serial.c
+  ${URG_LIBRARY_SRC_DIR}/urg_serial_utils.c
+  ${URG_LIBRARY_SRC_DIR}/urg_tcpclient.c
+)
 
 add_library(urg_node2_nl SHARED
 	src/urg_node2_nl.cpp)
@@ -30,9 +46,10 @@ rclcpp_components_register_node(urg_node2_nl
 	PLUGIN "urg_node2_nl::UrgNode2NL"
 	EXECUTABLE urg_node2_nl_node
 )
+target_link_libraries(urg_node2_nl urg_c)
 
 install(TARGETS
-	urg_node2_nl
+	urg_node2_nl urg_c
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
 	RUNTIME DESTINATION bin
