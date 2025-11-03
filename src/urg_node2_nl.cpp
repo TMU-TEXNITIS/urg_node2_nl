@@ -10,6 +10,7 @@ namespace urg_node2_nl
 {
 UrgNode2NL::UrgNode2NL(const rclcpp::NodeOptions & options) : Node("urg_node2_nl", options)
 {
+  RCLCPP_INFO(this->get_logger(), "Started UrgNode2NL. Initializing...");
   // set SIGPIPE signal ignore setting
   // if sensor's pwr is not turned on, connection trial causes SIGPIPE signal
   std::signal(SIGPIPE, SIG_IGN);
@@ -23,6 +24,7 @@ UrgNode2NL::UrgNode2NL(const rclcpp::NodeOptions & options) : Node("urg_node2_nl
     scan_pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::QoS(20));
   }
 
+  RCLCPP_INFO(this->get_logger(), "Initialize complete. Starting scan thread...");
   start_thread();
 }
 UrgNode2NL::~UrgNode2NL(void)
@@ -155,7 +157,7 @@ bool UrgNode2NL::connect(void)
     int result = urg_open(&urg_, URG_SERIAL, config_.serial_port_.c_str(), config_.serial_baud_);
     if (result < 0) {
       RCLCPP_ERROR(
-        this->get_logger(), "Could not open network Hokuyo 2D LiDAR\n%s:%d\n%s",
+        this->get_logger(), "Could not open serial port Hokuyo 2D LiDAR\n%s:%d\n%s",
         config_.serial_port_.c_str(), config_.serial_baud_, urg_error(&urg_));
       return false;
     }
@@ -351,7 +353,7 @@ void UrgNode2NL::update_sensor_states(void)
 void UrgNode2NL::scan_thread_func(void)
 {
   states_.reconnect_count_ = 0;
-  while (close_thread_flag_.load()) {
+  while (!close_thread_flag_.load()) {
     if (!states_.is_connected_) {
       if (!connect()) {
         rclcpp::sleep_for(500ms);
