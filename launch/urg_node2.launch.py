@@ -12,7 +12,7 @@ def generate_launch_description():
         executable='urg_node2_nl_node',
         name=LaunchConfiguration('node_name'),
         remappings=[('scan', LaunchConfiguration('scan_topic_name'))],
-        parameters=[PathJoinSubstitution([urg_node2_nl_pkg, "config", "params_serial.yaml"])],
+        parameters=[PathJoinSubstitution([urg_node2_nl_pkg, "config", "params_ether.yaml"])],
         namespace='',
         output='screen',
     )
